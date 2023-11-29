@@ -2,6 +2,7 @@ package com.amen.isa.order.controller;
 
 import com.amen.isa.model.domain.StoreOrder;
 import com.amen.isa.model.request.StoreOrderRequest;
+import com.amen.isa.model.response.OrderResponse;
 import com.amen.isa.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +18,7 @@ public class OrderController {
     private final OrderService orderService;
 
     @GetMapping()
-    public Flux<StoreOrder> getAll() {
+    public Flux<OrderResponse> getAll() {
         return orderService.getAll();
     }
 
