@@ -1,10 +1,10 @@
 package com.amen.isa.model.domain;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Id;
 import lombok.*;
+import org.bson.types.ObjectId;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.DocumentReference;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -22,8 +22,8 @@ public class StoreOrder {
 
     private String storeId;
 
-    @DocumentReference
-    private StoreUser user;
+    // @DocumentReference
+    private ObjectId userId;
 
     private Set<StoreOrderItem> items;
 

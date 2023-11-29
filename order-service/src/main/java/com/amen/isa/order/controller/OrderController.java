@@ -2,6 +2,7 @@ package com.amen.isa.order.controller;
 
 import com.amen.isa.model.domain.StoreOrder;
 import com.amen.isa.model.request.StoreOrderRequest;
+import com.amen.isa.model.response.OrderItemsResponse;
 import com.amen.isa.model.response.OrderResponse;
 import com.amen.isa.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,12 @@ public class OrderController {
     @GetMapping()
     public Flux<OrderResponse> getAll() {
         return orderService.getAll();
+    }
+
+    // http://localhost:808x/items?orderId=Y
+    @GetMapping("/items")
+    public Mono<OrderItemsResponse> orderItems(@RequestParam String orderId) {
+        return orderService.findOrderItems(orderId);
     }
 
     @PostMapping()

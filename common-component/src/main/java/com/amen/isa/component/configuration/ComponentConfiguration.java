@@ -13,7 +13,9 @@ public class ComponentConfiguration {
     @Bean
     @Qualifier("userServiceWebClient")
     public WebClient userServiceWebClient() {
-        return WebClient.builder().baseUrl("http://localhost:8081").build();
+        return WebClient.builder()
+                .baseUrl("http://localhost:8081")
+                .build();
     }
 
     @Bean

@@ -8,6 +8,7 @@ import com.amen.isa.model.domain.ProductQuantity;
 import com.amen.isa.model.domain.StoreOrder;
 import com.amen.isa.model.domain.StoreOrderItem;
 import com.amen.isa.order.OrderServiceApplication;
+import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +44,7 @@ class StoreOrderDataGenerator {
                                           new ProductQuantity(new Random().nextInt(1000) + 1, new Random().nextInt(100) + 2, randomUnit));
             }).limit(new Random().nextInt(10)).collect(Collectors.toSet());
 
-            orderRepository.save(new StoreOrder(null, "1", randomUser, randomOrders, LocalDateTime.now())).log().block();
+            orderRepository.save(new StoreOrder(null, "1", new ObjectId(randomUser.getUserId()), randomOrders, LocalDateTime.now())).log().block();
         }
     }
 }

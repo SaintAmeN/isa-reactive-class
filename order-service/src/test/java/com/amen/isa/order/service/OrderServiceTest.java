@@ -38,7 +38,7 @@ class OrderServiceTest {
         ));
 
 
-        OrderService orderService = new OrderService(orderRepository, userRepository, null);
+        OrderService orderService = new OrderService(null, orderRepository, userRepository, null);
         var response = orderService.zipUserWithOrders("123456789012345678901234");
 
         StepVerifier.create(response)

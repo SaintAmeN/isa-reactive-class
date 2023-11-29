@@ -7,8 +7,11 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 public class ProductServiceClient {
@@ -22,4 +25,18 @@ public class ProductServiceClient {
                                                                                            });
         return responseEntity.getBody();
     }
+
+    public Flux<Product> getProducts() {
+        return Flux.fromIterable(getAllBlocking());
+    }
+
+    public Mono<Map<Long, Product>> getProductsMap() {
+        return getProducts()
+                .collectMap(Product::getId,
+                            product -> product);
+    }
+
+    // [] [] [] [] | [] [] [] [] []
+    //     x     x |
+    //               X  X
 }
