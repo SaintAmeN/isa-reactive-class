@@ -1,0 +1,19 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: isa-product
+  datasource:
+    url: jdbc:mysql://localhost:3306/isa2?serverTimezone=Europe/Warsaw&createDatabaseIfNotExist=True
+    password: root
+    username: root
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+logging:
+  level:
+    org.springframework: DEBUG
+  file:
+    name: /tmp/logs/${spring.application.name}.log

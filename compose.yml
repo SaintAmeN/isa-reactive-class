@@ -1,0 +1,22 @@
+services:
+  mongo:
+    image: mongo:4.4.18
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    networks:
+      - isa-network
+    environment:
+      - MONGO_INITDB_DATABASE=isa1
+    restart: always
+  db:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'isa2'
+      MYSQL_PASSWORD: 'root'
+      MYSQL_ROOT_PASSWORD: 'root'
+    ports:
+      - '3306:3306'
+networks:
+  isa-network:
