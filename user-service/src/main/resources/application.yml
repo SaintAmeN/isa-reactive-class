@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: isa-test-1
+    name: isa-user-service
   data:
     mongodb:
       host: localhost

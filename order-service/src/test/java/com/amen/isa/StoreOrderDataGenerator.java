@@ -34,7 +34,7 @@ class StoreOrderDataGenerator {
         var allUsers = userServiceClient.getAllBlocking();
         var allProducts = productServiceClient.getAllBlocking();
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 3; i++) {
             var randomUser = allUsers.get(new Random().nextInt(allUsers.size()));
             var randomOrders = Stream.generate(() -> {
                 var randomProductId = allProducts.get(new Random().nextInt(allProducts.size())).getId();
@@ -43,7 +43,7 @@ class StoreOrderDataGenerator {
                                           new ProductQuantity(new Random().nextInt(1000) + 1, new Random().nextInt(100) + 2, randomUnit));
             }).limit(new Random().nextInt(10)).collect(Collectors.toSet());
 
-            orderRepository.save(new StoreOrder(null, randomUser, randomOrders, LocalDateTime.now())).log().block();
+            orderRepository.save(new StoreOrder(null, "1", randomUser, randomOrders, LocalDateTime.now())).log().block();
         }
     }
 }

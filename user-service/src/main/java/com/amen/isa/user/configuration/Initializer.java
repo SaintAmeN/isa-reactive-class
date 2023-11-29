@@ -20,16 +20,16 @@ public class Initializer {
     @EventListener(ApplicationReadyEvent.class)
     public void initialize() {
         log.info("Init");
-        reactiveMongoTemplate.collectionExists(StoreUser.class).subscribe(exists -> {
-            log.info("Exists: {}", exists);
-            if (!exists) {
-                log.info("Not exists collection");
-                reactiveMongoTemplate.createCollection(StoreUser.class, CollectionOptions.empty().capped().size(100).maxDocuments(20))
-                        .subscribe(documentMongoCollection -> {
-                            log.info("Created collection");
-                        });
-            }
-        });
+//        reactiveMongoTemplate.collectionExists(StoreUser.class).subscribe(exists -> {
+//            log.info("Exists: {}", exists);
+//            if (!exists) {
+//                log.info("Not exists collection");
+//                reactiveMongoTemplate.createCollection(StoreUser.class, CollectionOptions.empty().capped().size(100).maxDocuments(20))
+//                        .subscribe(documentMongoCollection -> {
+//                            log.info("Created collection");
+//                        });
+//            }
+//        });
 
     }
 }

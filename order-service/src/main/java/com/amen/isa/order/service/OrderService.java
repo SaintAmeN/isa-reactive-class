@@ -5,6 +5,7 @@ import com.amen.isa.component.repository.UserRepository;
 import com.amen.isa.model.domain.StoreOrder;
 import com.amen.isa.model.mapper.OrderMapper;
 import com.amen.isa.model.request.StoreOrderRequest;
+import com.amen.isa.model.response.OrderResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,13 +20,29 @@ public class OrderService {
     private final UserRepository userRepository;
     private final OrderMapper orderMapper;
 
-    public Flux<StoreOrder> getAll() {
-        var list = orderRepository.findAll();
-        return list.map(storeOrder -> {
-            System.out.println(storeOrder.getUser());
-            return storeOrder;
+    // Zip User+Order+Shipment
+
+    public Flux<OrderResponse> getAll() {
+        var orders = orderRepository.findAll();
+
+
+        return orders.flatMap(order ->{
+            var users = userRepository.findAll();
+
+            return users
+                    .filter(storeUser -> storeUser.getUserId() == order.getUser().getUserId())
+                    .map(storeUser -> new OrderResponse(
+                            order.getStoreId(),
+                            storeUser,
+                            order.getItems(),
+                            order.getCreated()
+                    ));
         });
     }
+
+//    public Mono<String> getAll() {
+////
+//    }
 
     public Mono<StoreOrder> add(final StoreOrderRequest request) {
         return userRepository.findById(request.userId())
