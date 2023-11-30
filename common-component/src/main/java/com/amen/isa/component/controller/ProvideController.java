@@ -32,10 +32,10 @@ public class ProvideController {
                 .map(aLong -> new NonPrimitiveResponse(applicationName, counter.getAndIncrement()));
     }
 
-    @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Mono<NonPrimitiveResponse> provideMono() {
-        return Mono.empty();
-    }
+//    @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+//    public Mono<NonPrimitiveResponse> provideMono() {
+//        return Mono.empty();
+//    }
 
 //    @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
 //    public Flux<NonPrimitiveResponse> batch() {

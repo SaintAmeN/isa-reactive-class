@@ -4,6 +4,7 @@ import com.amen.isa.component.repository.ProductRepository;
 import com.amen.isa.model.domain.Product;
 import com.amen.isa.model.mapper.ProductMapper;
 import com.amen.isa.model.request.AddProductRequest;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,5 +25,9 @@ public class ProductService {
     public Product addProduct(final AddProductRequest request) {
         var product = productMapper.addProductRequestToProduct(request);
         return productRepository.save(product);
+    }
+
+    public Product getProduct(Long productId) {
+        return productRepository.findById(productId).orElseThrow(EntityNotFoundException::new);
     }
 }

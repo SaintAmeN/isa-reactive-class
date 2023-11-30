@@ -22,6 +22,33 @@ public class ComponentConfiguration {
                 .build();
     }
 
+    @Bean
+    @Qualifier("orderServiceWebClient")
+    public WebClient orderServiceWebClient() {
+        return WebClient.builder()
+                .baseUrl("http://localhost:8083")
+                .filter(logRequest())
+                .build();
+    }
+
+    @Bean
+    @Qualifier("productServiceWebClient")
+    public WebClient productServiceWebClient() {
+        return WebClient.builder()
+                .baseUrl("http://localhost:8082")
+                .filter(logRequest())
+                .build();
+    }
+
+    @Bean
+    @Qualifier("shipmentServiceWebClient")
+    public WebClient shipmentServiceWebClient() {
+        return WebClient.builder()
+                .baseUrl("http://localhost:8085")
+                .filter(logRequest())
+                .build();
+    }
+
     private ExchangeFilterFunction logRequest() {
         return (request, next) -> {
             log.info("Request: {}", request);
@@ -29,10 +56,10 @@ public class ComponentConfiguration {
         };
     }
 
-    @Bean
-    public UserServiceClient userServiceClient(WebClient userServiceWebClient) {
-        return new UserServiceClient(userServiceWebClient);
-    }
+//    @Bean
+//    public UserServiceClient userServiceClient(WebClient userServiceWebClient) {
+//        return new UserServiceClient(userServiceWebClient);
+//    }
 
 
 //    @Bean
@@ -47,8 +74,8 @@ public class ComponentConfiguration {
         return new RestTemplate();
     }
 
-    @Bean
-    public ProductServiceClient productServiceClient(RestTemplate productServiceRestTemplate) {
-        return new ProductServiceClient(productServiceRestTemplate);
-    }
+//    @Bean
+//    public ProductServiceClient productServiceClient(RestTemplate productServiceRestTemplate) {
+//        return new ProductServiceClient(productServiceRestTemplate);
+//    }
 }

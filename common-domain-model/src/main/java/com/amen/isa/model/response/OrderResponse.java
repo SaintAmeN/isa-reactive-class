@@ -6,7 +6,7 @@ import com.amen.isa.model.domain.StoreUser;
 import java.time.LocalDateTime;
 import java.util.Set;
 
-public record OrderResponse(String storeId,
+public record OrderResponse(String orderId,
                             StoreUser user,
                             Set<StoreOrderItem> items,
                             LocalDateTime created) {

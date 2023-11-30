@@ -21,6 +21,11 @@ public class ProductController {
         return productService.getAll();
     }
 
+    @GetMapping("/byId")
+    public Product getProduct(@RequestParam Long productId) {
+        return productService.getProduct(productId);
+    }
+
     @PostMapping()
     public Product add(@RequestBody AddProductRequest request) {
         return productService.addProduct(request);

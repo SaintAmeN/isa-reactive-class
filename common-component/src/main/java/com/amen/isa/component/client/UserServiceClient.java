@@ -4,6 +4,7 @@ import com.amen.isa.component.exception.CustomException;
 import com.amen.isa.model.domain.StoreUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+@Component
 @RequiredArgsConstructor
 public class UserServiceClient {
     private final WebClient userServiceWebClient;

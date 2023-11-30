@@ -45,7 +45,9 @@ public class OrderService {
         var orders = orderRepository.findAll();     // O1 , O2 , O3
         var users = userRepository.findAll();       // U5 , U6 , U9
 
-        return orders.flatMap(order -> users.filter(storeUser -> storeUser.getUserId().equals(order.getUserId().toString())).map(storeUser -> new OrderResponse(order.getStoreId(), storeUser, order.getItems(), order.getCreated())));
+        return orders
+                .flatMap(order -> users.filter(storeUser -> storeUser.getUserId().equals(order.getUserId().toString()))
+                .map(storeUser -> new OrderResponse(order.getId(), storeUser, order.getItems(), order.getCreated())));
     }
 
     public Mono<StoreOrder> add(final StoreOrderRequest request) {

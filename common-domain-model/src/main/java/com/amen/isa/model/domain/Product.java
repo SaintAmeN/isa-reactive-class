@@ -21,4 +21,7 @@ public class Product {
     private Long id;
 
     private String name;
+
+    private double quantity = 0.0;
+    private MeasureUnit unit = MeasureUnit.UNIT;
 }
