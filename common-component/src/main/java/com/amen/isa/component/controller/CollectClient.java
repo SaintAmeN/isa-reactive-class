@@ -13,6 +13,7 @@ public class CollectClient {
         return userServiceWebClient.get()
                 .uri("/provide")
                 .retrieve()
-                .bodyToFlux(NonPrimitiveResponse.class);
+                .bodyToFlux(NonPrimitiveResponse.class)
+                ;
     }
 }

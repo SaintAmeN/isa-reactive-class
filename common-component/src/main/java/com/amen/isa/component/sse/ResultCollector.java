@@ -1,6 +1,7 @@
 package com.amen.isa.component.sse;
 
 import com.amen.isa.component.controller.CollectClient;
+import com.amen.isa.component.exception.CustomException;
 import com.amen.isa.model.response.NonPrimitiveResponse;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
@@ -50,30 +51,54 @@ public class ResultCollector<T> {
         return calls
                 .parallel()
                 .flatMap(callFlux -> callFlux
-                        .flatMap(result -> Flux.just(new CallResult<T>(result, null)))
-                        .retryWhen(Retry.backoff(10L, Duration.of(1L, ChronoUnit.SECONDS)))
-                        .onErrorContinue((throwable, o) -> {
-                            log.info("Error happened:Y {}", throwable, throwable);
-                        })
-                        .doOnError(throwable -> {
-                            log.info("Error happened:T {}", throwable, throwable);
-                        })
+                                 .flatMap(result -> Flux.just(new CallResult<T>(result, null)))
+                                 // onError
+                                 //  recovery ->
+                                 //          onErrorResume
+                                 //          onErrorReturn
+                                 //          onErrorContinue
+                                 .onErrorContinue((throwable, o) -> {
+                                     log.info("OnErrorContinue o: {}", o.getClass());
+                                     log.info("OnErrorContinue o: {}", o);
+//                            log.info("OnErrorContinue: {}", , throwable);
+                                 })
+//                        .onErrorResume(throwable -> true, throwable -> {
+//                            log.info("OnErrorResume: {}", throwable, throwable);
+//                            return Flux.just(new CallResult<T>(null, throwable.getMessage()));
+//                        })
+                         // retry only on certain error
+                        .retryWhen(Retry.backoff(50L, Duration.of(1L, ChronoUnit.SECONDS))
+                                           .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> new CustomException()))
                 )
                 .sequential()
                 .onErrorContinue((throwable, o) -> {
-                    log.info("Error happened: {}", throwable, throwable);
+                    log.info("OnErrorContinue o: {}", o.getClass());
+                    log.info("OnErrorContinue o: {}", o);
+//                            log.info("OnErrorContinue: {}", , throwable);
                 });
+//                .onErrorResume(throwable -> true, throwable -> {
+//                    log.info("OnErrorResume: {}", throwable, throwable);
+//                    return Flux.just(new CallResult<T>(null, throwable.getMessage()));
+//                });
     }
 
     public Flux<CallResult<T>> collectSingle(Flux<T> callFlux) {
-        return callFlux.map(result -> new CallResult<T>(result, null)).onErrorContinue((ex, name) -> new CallResult<T>(null, ex));
+        return callFlux.flatMap(result -> Flux.just(new CallResult<T>(result, null)))
+//                .doOnError(throwable -> {
+//                    log.info("Error happened:T {}", throwable, throwable);
+//                })
+                .onErrorContinue((throwable, o) -> {
+                    log.info("ErrorT happened: {}", throwable, throwable);
+                })
+                .retryWhen(Retry.backoff(50L, Duration.of(1L, ChronoUnit.SECONDS)));
     }
 
     public Flux<Tuple3<CallResult<T>, CallResult<T>, CallResult<T>>> zipCollect() {
-        return Flux.zip(collectSingle((Flux<T>) createClient("http://localhost:8081")), collectSingle((Flux<T>) createClient("http://localhost:8082")),
+        return Flux.zip(collectSingle((Flux<T>) createClient("http://localhost:8081")),
+                        collectSingle((Flux<T>) createClient("http://localhost:8082")),
                         collectSingle((Flux<T>) createClient("http://localhost:8083")));
     }
 
-    public record CallResult<T>(T result, Throwable error) {
+    public record CallResult<T>(T result, String errorMessage) {
     }
 }

@@ -19,25 +19,10 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-//    private final TailableCursorRequest tailableCursorRequest;
-//    private final ReactiveMongoTemplate reactiveMongoTemplate;
-//    private final MongoTemplate mongoTemplate;
-//    private final ReactiveMongoOperations mongoOperations;
 
     public Flux<StoreUser> getAll() {
         return userRepository.findAll().log();
     }
-
-//    TODO: (optional) add
-//    TODO: (optional) add replica and subscribe to collection
-//    public Flux<StoreUser> subscribe() {
-//        return mongoTemplate
-//                .changeStream(StoreUser.class)
-//                .watchCollection("store.user")
-//                .listen()
-//                .map(ChangeStreamEvent::getBody);
-//    }
-
 
     public Mono<StoreUser> addUser(final AddUserRequest request) {
         var user = userMapper.addUserRequestToStoreUser(request);
