@@ -3,6 +3,7 @@ package com.amen.isa.report.service;
 import com.amen.isa.component.client.OrderServiceClient;
 import com.amen.isa.component.client.ProductServiceClient;
 import com.amen.isa.component.client.ShipmentServiceClient;
+import com.amen.isa.component.exception.CustomException;
 import com.amen.isa.model.response.OrderResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,7 +51,8 @@ public class ReportService {
         // > List[Obj]
         // >> Mono List[Obj]
         // Mono list -> flux -> (retry) [nie działa na mono]
-        orders.flatMap(orderResponse -> {
+        orders
+                .flatMap(orderResponse -> {
                     return Flux.fromIterable(orderResponse.items())
                             .flatMap(storeOrderItem -> {
                                 log.info("Product requesting: {}", storeOrderItem.productId());
@@ -66,6 +68,11 @@ public class ReportService {
                     log.info("Triggering for: {}", products);
                     return shipmentServiceClient.submitShipments(products);
                 })
+//                .switchIfEmpty(Mono.error(CustomException::new))
+                .onErrorContinue((throwable, o) -> {
+                    log.error("Error on value: {}", o);
+                })
+//                .defaultIfEmpty(Mono.error(CustomException::new))
                 .subscribe();
     }
 }

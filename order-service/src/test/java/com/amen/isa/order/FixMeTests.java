@@ -14,9 +14,12 @@ public class FixMeTests {
     // Error handling:
     //      recovery: onErrorReturn, onErrorResume, onErrorContinue
     //      apply on exception: onErrorMap, doOnError
+    //
     // Mono<Void> - jak kontynuowac bez sygnalu
     // Retry:
     //      retry, retryWhen, repeat
+
+/////////////////////////////////////////////////////////////////
     // Testowanie:
     //      - sposoby deklarowania mock'ów etc.
     //      - parametrized
