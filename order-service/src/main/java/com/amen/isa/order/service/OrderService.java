@@ -17,6 +17,7 @@ import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import reactor.util.function.Tuple2;
 
 import java.util.List;
@@ -44,38 +45,27 @@ public class OrderService {
         var orders = orderRepository.findAll();     // O1 , O2 , O3
         var users = userRepository.findAll();       // U5 , U6 , U9
 
-        return orders.flatMap(order -> users
-                .filter(storeUser -> storeUser.getUserId().equals(order.getUserId().toString()))
-                .map(storeUser -> new OrderResponse(
-                        order.getStoreId(),
-                        storeUser,
-                        order.getItems(),
-                        order.getCreated()
-                )));
+        return orders.flatMap(order -> users.filter(storeUser -> storeUser.getUserId().equals(order.getUserId().toString())).map(storeUser -> new OrderResponse(order.getStoreId(), storeUser, order.getItems(), order.getCreated())));
     }
 
     public Mono<StoreOrder> add(final StoreOrderRequest request) {
-        return userRepository.findById(request.userId())
-                .flatMap(storeUser -> {
-                             var storeOrder = orderMapper.requestToStoreOrder(request, storeUser);
-                             return orderRepository.save(storeOrder);
-                         }
-                );
-
+        return userRepository.findById(request.userId()).flatMap(storeUser -> {
+            var storeOrder = orderMapper.requestToStoreOrder(request, storeUser);
+            return orderRepository.save(storeOrder);
+        });
     }
 
     public Mono<OrderItemsResponse> findOrderItems(String orderId) {
         var products = productServiceClient.getProductsMap();
         var order = orderRepository.findById(orderId);
 
-        return order.map(storeOrder -> new OrderItemsResponse(storeOrder.getId(),
-                                                              storeOrder.getItems().stream()
-                                                                      .map(storeOrderItem -> {
-                                                                          var product = products.map(mapProducts -> mapProducts.get(storeOrderItem.productId()));
-                                                                          return new OrderItemDto(storeOrderItem.productId(),
-                                                                                                  product.map(product1 -> product1.getName()).block(),
-                                                                                                  storeOrderItem.quantity());
-                                                                      }).collect(Collectors.toList())
-        ));
+        var mappedItems = order
+                .flatMapIterable(StoreOrder::getItems)
+                .publishOn(Schedulers.boundedElastic())
+                .map(storeOrderItem -> {
+                    var product = products.map(mapProducts -> mapProducts.get(storeOrderItem.productId()));
+                    return new OrderItemDto(storeOrderItem.productId(), product.map(product1 -> product1.getName()).block(), storeOrderItem.quantity());
+                });
+        return order.publishOn(Schedulers.boundedElastic()).map(storeOrder -> new OrderItemsResponse(storeOrder.getId(), mappedItems.collectList().block())).log();
     }
 }

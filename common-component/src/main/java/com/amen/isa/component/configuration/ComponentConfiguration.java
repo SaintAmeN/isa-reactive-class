@@ -2,12 +2,15 @@ package com.amen.isa.component.configuration;
 
 import com.amen.isa.component.client.ProductServiceClient;
 import com.amen.isa.component.client.UserServiceClient;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.*;
+import reactor.core.publisher.Mono;
 
+@Slf4j
 @Configuration
 public class ComponentConfiguration {
     @Bean
@@ -15,7 +18,15 @@ public class ComponentConfiguration {
     public WebClient userServiceWebClient() {
         return WebClient.builder()
                 .baseUrl("http://localhost:8081")
+                .filter(logRequest())
                 .build();
+    }
+
+    private ExchangeFilterFunction logRequest() {
+        return (request, next) -> {
+            log.info("Request: {}", request);
+            return next.exchange(request);
+        };
     }
 
     @Bean

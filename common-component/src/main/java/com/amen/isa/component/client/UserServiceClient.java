@@ -1,10 +1,12 @@
 package com.amen.isa.component.client;
 
+import com.amen.isa.component.exception.CustomException;
 import com.amen.isa.model.domain.StoreUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 
@@ -21,10 +23,30 @@ public class UserServiceClient {
         return userServiceWebClient.get()
                 .uri("/user")
                 .retrieve()
-                .onStatus(httpStatusCode -> httpStatusCode.value() == 404, new FailOn404() )
                 .bodyToFlux(StoreUser.class)
                 .collectList()
                 .block();
+    }
+
+    public Flux<StoreUser> getUsersRertryOn5xx() {
+        return userServiceWebClient.get()
+                .uri("/user")
+                .retrieve()
+                .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> Mono.error(new CustomException()))
+                .bodyToFlux(StoreUser.class)
+                .retryWhen(Retry.max(3).filter(t -> t instanceof CustomException));
+
+    }
+
+    public Flux<StoreUser> getUsersRertryOnNon404() {
+        return userServiceWebClient.get()
+                .uri("/user")
+                .retrieve()
+                .onStatus(httpStatusCode -> httpStatusCode.value() == 404, clientResponse -> Mono.empty())
+                .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> Mono.error(new CustomException()))
+                .bodyToFlux(StoreUser.class)
+                .retryWhen(Retry.max(3).filter(t -> t instanceof CustomException));
+
     }
 
     // scheduler
