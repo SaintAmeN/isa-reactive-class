@@ -4,8 +4,6 @@ import com.amen.isa.model.domain.Product;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-
 public interface IProductService {
     Mono<Product> getProductById(Long productId);
 

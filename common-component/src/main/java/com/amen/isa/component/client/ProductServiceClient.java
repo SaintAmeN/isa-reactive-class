@@ -2,6 +2,7 @@ package com.amen.isa.component.client;
 
 import com.amen.isa.model.domain.Product;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -14,7 +15,9 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class ProductServiceClient {
@@ -50,5 +53,14 @@ public class ProductServiceClient {
     // TODO: Write me :)
     public Flux<Product> fetchAvailableProducts() {
         return null;
+    }
+
+    public Mono<Product> getProductById(Long productId, Object t) {
+        log.info("Span: {}", t);
+        return productServiceWebClient.get()
+                .uri("/product/byId?productId=" + productId)
+                .header("x-tracing-id", String.valueOf(t))
+                .retrieve()
+                .bodyToMono(Product.class);
     }
 }

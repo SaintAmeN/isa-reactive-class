@@ -3,7 +3,9 @@ package com.amen.isa.user.service;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
+import reactor.util.context.Context;
 
 import java.util.Random;
 
@@ -66,6 +68,44 @@ class BasketServiceImplTest {
             Thread.sleep(10000);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    void testContext(){
+        // Start a Mono with a specific context value
+        Mono<String> monoWithContext = Mono.deferContextual(ctx -> {
+            String value = ctx.getOrDefault("initialKey", "DefaultValue");
+            log.info("Initial Value in Context: " + value);
+
+            // Perform some asynchronous or reactive operation here
+            return Mono.just("Result from Mono").contextWrite(Context.of("initialKey", value));
+        }).contextWrite(Context.of("initialKey", "CustomValue"));
+
+        // Subscribe to the Mono
+        monoWithContext.contextCapture().subscribe(result -> {
+            log.info("Result: " + result);
+
+            // Access the context within the subscriber
+            String finalValue = Mono.deferContextual(ctx -> Mono.just(String.valueOf(ctx.get("initialKey")))).block();
+            log.info("Final Value in Context: " + finalValue);
+        });
+    }
+    @Test
+    void testContext2() throws InterruptedException {
+        {
+            // Creating a Mono with a specific context
+            Mono<String> monoWithContext = Mono.deferContextual(ctx -> {
+                String initialValue = ctx.getOrDefault("initialKey", "DefaultValue");
+                System.out.println("Initial Value in Context: " + initialValue);
+
+                // Perform some asynchronous or reactive operation here
+                return Mono.just("Result from Mono");
+            }).contextWrite(Context.of("initialKey", "CustomValue"));
+
+            // Subscribe to the Mono
+            monoWithContext.subscribe(result -> System.out.println("Result: " + result));
+            Thread.sleep(1000);
         }
     }
 }
