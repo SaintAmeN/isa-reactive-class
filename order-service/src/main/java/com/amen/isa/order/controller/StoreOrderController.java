@@ -1,11 +1,11 @@
-package com.amen.isa.report.controller;
+package com.amen.isa.order.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 // TODO: Write me :)
 @RestController
-@RequestMapping("/api/reports")
-public class ReportController {
-    // Inject ReportService and implement REST endpoints
+@RequestMapping("/api/orders")
+public class StoreOrderController {
+
 }

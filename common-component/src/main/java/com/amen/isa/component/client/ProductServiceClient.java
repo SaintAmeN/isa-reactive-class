@@ -46,4 +46,9 @@ public class ProductServiceClient {
                 .collectMap(Product::getId,
                             product -> product);
     }
+
+    // TODO: Write me :)
+    public Flux<Product> fetchAvailableProducts() {
+        return null;
+    }
 }

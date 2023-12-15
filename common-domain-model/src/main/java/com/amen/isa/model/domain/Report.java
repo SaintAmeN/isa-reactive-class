@@ -26,5 +26,15 @@ public class Report {
     @CreationTimestamp
     private LocalDateTime created;
 
+    // New properties for assessing sales and calculating margins
+    private double totalSales;
+    private double totalCost;
+    private double totalProfitMargin;
+
+    // Other properties related to order statistics
+    private int totalOrders;
+    private int successfulOrders;
+    private int failedOrders;
+
 
 }
