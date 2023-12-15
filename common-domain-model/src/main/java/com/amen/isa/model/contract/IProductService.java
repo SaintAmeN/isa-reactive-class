@@ -1,7 +1,5 @@
 package com.amen.isa.model.contract;
 
-import com.amen.isa.model.domain.Basket;
-import com.amen.isa.model.domain.BasketPosition;
 import com.amen.isa.model.domain.Product;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

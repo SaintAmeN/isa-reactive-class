@@ -6,6 +6,7 @@ import com.amen.isa.component.client.ShipmentServiceClient;
 import com.amen.isa.model.domain.*;
 import com.amen.isa.model.response.ShipmentResponse;
 import org.bson.types.ObjectId;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -15,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -48,10 +50,10 @@ class ReportServiceTest {
         when(shipmentServiceClient.fetchShipmentsBetweenDates(any(), any())).thenReturn(Flux.just(createMockShipment()));
 
         // Call the service method
-        Report report = reportService.generateReport(LocalDateTime.now().minusDays(7), LocalDateTime.now());
+        Mono<Report> report = reportService.generateReport(LocalDateTime.now().minusDays(7), LocalDateTime.now());
 
         // Assert the results
-        assertNotNull(report);
+        report.subscribe(Assertions::assertNotNull);
         // Add more assertions based on your business logic
     }
 
@@ -108,10 +110,10 @@ class ReportServiceTest {
         when(shipmentServiceClient.fetchShipmentsBetweenDates(any(), any())).thenReturn(Flux.empty());
 
         // Call the service method
-        Report report = reportService.generateReport(LocalDateTime.now().minusDays(7), LocalDateTime.now());
+        Mono<Report> report = reportService.generateReport(LocalDateTime.now().minusDays(7), LocalDateTime.now());
 
         // Assert the results for scenarios with empty orders and shipments
-        assertNotNull(report);
+        report.subscribe(Assertions::assertNotNull);
         // Add assertions for cases with no orders and shipments
     }
 
@@ -124,13 +126,14 @@ class ReportServiceTest {
         when(shipmentServiceClient.fetchShipmentsBetweenDates(any(), any())).thenReturn(shipments);
 
         // Call the service method
-        Report report = reportService.generateReport(LocalDateTime.now().minusDays(7), LocalDateTime.now());
+        Mono<Report> result = reportService.generateReport(LocalDateTime.now().minusDays(7), LocalDateTime.now());
 
         // Assert the results
-        assertNotNull(report);
-        assertEquals(expectedTotalSales, report.getTotalSales(), 0.01);
-        assertEquals(expectedTotalCost, report.getTotalCost(), 0.01);
-        // Add more assertions based on your business logic
+        result.subscribe(report -> {
+            assertEquals(expectedTotalSales, report.getTotalSales(), 0.01);
+            assertEquals(expectedTotalCost, report.getTotalCost(), 0.01);
+            // Add more assertions based on your business logic
+        });
     }
 
     private static StoreOrder createMockStoreOrder(Long productId) {

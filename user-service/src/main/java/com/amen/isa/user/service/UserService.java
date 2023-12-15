@@ -20,6 +20,10 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
+    public Mono<StoreUser> getUserById(String id){
+        return Mono.empty();
+    }
+
     public Flux<StoreUser> getAll() {
         return userRepository.findAll().log();
     }

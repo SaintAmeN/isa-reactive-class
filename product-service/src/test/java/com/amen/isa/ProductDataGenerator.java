@@ -1,6 +1,7 @@
 package com.amen.isa;
 
 import com.amen.isa.component.repository.ProductRepository;
+import com.amen.isa.model.domain.MeasureUnit;
 import com.amen.isa.model.domain.Product;
 import com.amen.isa.product.ProductServiceApplication;
 import net.datafaker.Faker;
@@ -22,7 +23,7 @@ class ProductDataGenerator {
     void generateProducts() {
         var faker = new Faker();
         for (int i = 0; i < 10; i++) {
-            var product = new Product(null, faker.food().ingredient());
+            var product = new Product(null, faker.food().ingredient(), 5, MeasureUnit.UNIT);
             productRepository.save(product);
         }
     }
