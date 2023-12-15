@@ -2,12 +2,13 @@ package com.amen.isa.model.contract;
 
 import com.amen.isa.model.domain.Basket;
 import com.amen.isa.model.domain.BasketPosition;
+import reactor.core.publisher.Mono;
 
 public interface IBasketService {
-    Basket getBasket(String userId);
+    Mono<Basket> getBasket(String userId);
 
-    Basket addToBasket(String userId, BasketPosition position);
+    Mono<Basket> addToBasket(String userId, BasketPosition position);
 
-    Basket removeFromBasket(String userId, int position);
+    Mono<Basket> removeFromBasket(String userId, int position);
 }
 

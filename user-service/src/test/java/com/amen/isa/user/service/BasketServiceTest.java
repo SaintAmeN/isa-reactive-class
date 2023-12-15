@@ -34,10 +34,12 @@ class BasketServiceTest {
         StoreUser mockStoreUser = StoreUser.builder().userId(userId).basket(mockBasket).build();
         when(storeUserRepository.save(any(StoreUser.class))).thenReturn(Mono.just(mockStoreUser));
 
-        Basket result = basketService.getBasket(userId);
+        Mono<Basket> result = basketService.getBasket(userId);
 
         assertNotNull(result);
-        assertEquals(mockBasket, result);
+        result.subscribe(basket -> {
+            assertEquals(mockBasket, basket);
+        });
     }
 
     @Test
@@ -49,10 +51,13 @@ class BasketServiceTest {
         when(storeUserRepository.findById(userId)).thenReturn(Mono.just(mockStoreUser));
         when(storeUserRepository.save(any(StoreUser.class))).thenReturn(Mono.just(mockStoreUser));
 
-        Basket result = basketService.addToBasket(userId, basketPosition);
+        Mono<Basket> result = basketService.addToBasket(userId, basketPosition);
 
-        assertNotNull(result);
-        assertEquals(1, result.getPositions().size());
+        result.subscribe(basket -> {
+            assertNotNull(basket);
+            assertEquals(1, basket.getPositions().size());
+        });
+
     }
 
     @Test
@@ -65,10 +70,14 @@ class BasketServiceTest {
         when(storeUserRepository.findById(userId)).thenReturn(Mono.just(mockStoreUser));
         when(storeUserRepository.save(any(StoreUser.class))).thenReturn(Mono.just(mockStoreUser));
 
-        Basket result = basketService.removeFromBasket(userId, position);
+        Mono<Basket> result = basketService.removeFromBasket(userId, position);
 
         assertNotNull(result);
-        assertTrue(result.getPositions().isEmpty());
+
+        result.subscribe(basket -> {
+            assertNotNull(basket);
+            assertTrue(basket.getPositions().isEmpty());
+        });
     }
 
 }

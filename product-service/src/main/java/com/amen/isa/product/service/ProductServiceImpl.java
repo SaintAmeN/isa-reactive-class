@@ -3,6 +3,8 @@ package com.amen.isa.product.service;
 import com.amen.isa.model.contract.IProductService;
 import com.amen.isa.model.domain.Product;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -10,17 +12,17 @@ import java.util.List;
 @Service
 public class ProductServiceImpl implements IProductService {
     @Override
-    public Product getProductById(Long productId) {
+    public Mono<Product> getProductById(Long productId) {
         return null;
     }
 
     @Override
-    public List<Product> getAllProducts() {
+    public Flux<Product> getAllProducts() {
         return null;
     }
 
     @Override
-    public Product saveProduct(Product product) {
+    public Mono<Product> saveProduct(Product product) {
         return null;
     }
 
