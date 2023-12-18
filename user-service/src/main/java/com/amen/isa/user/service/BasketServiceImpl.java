@@ -56,29 +56,28 @@ public class BasketServiceImpl implements IBasketService {
         return userRepository.findById(userId)
                 .flatMap(storeUser -> {
                     log.info("User is found");
-                    return Mono.deferContextual(contextView -> {
-                        String ctxVal = contextView.get("tracing-id");
-                        log.info("Defer: {}", String.valueOf(ctxVal));
-                        return Mono.zip(
-                                        // defer poczekaj ze stworzeniem flux/mono dopóki nie dotrzemy do tego miejsca
-                                        productServiceClient.getProductById(productId, ctxVal).map(Product::getUnit),
-                                        productServiceClient.getProductById(productId, ctxVal).map(Product::getName)
-                                )
-                                .map(tupleResult -> {
-                                    log.info("Tuple collected");
-                                    return new BasketPosition(0,
-                                                              new Product(0L, tupleResult.getT2(), 1, tupleResult.getT1()),
-                                                              new ProductQuantity(10.0, 1, tupleResult.getT1()));
-                                })
-                                .flatMap(basketPosition -> {
-                                    log.info("Tuple collected");
-                                    storeUser.getBasket().getPositions().add(basketPosition);
-                                    return userRepository.save(storeUser);
-                                })
-                                .map(storeUser1 -> {
-                                    return storeUser1.getBasket();
-                                });
-                    });
+                    return Mono.zip(
+                                    productServiceClient.getProductById(productId)
+                                            .mapNotNull(Product::getUnit)
+                                            .defaultIfEmpty(MeasureUnit.UNIT),
+                                    productServiceClient.getProductById(productId)
+                                            .mapNotNull(Product::getName)
+                                            .defaultIfEmpty("N/A")
+                            )
+                            .map(tupleResult -> {
+                                log.info("Tuple collected: {}", tupleResult);
+                                return new BasketPosition(0,
+                                                          new Product(0L, tupleResult.getT2(), 1, tupleResult.getT1()),
+                                                          new ProductQuantity(10.0, 1, tupleResult.getT1()));
+                            })
+                            .flatMap(basketPosition -> {
+                                log.info("Tuple processed, got basket position: {}", basketPosition);
+                                storeUser.getBasket().getPositions().add(basketPosition);
+                                return userRepository.save(storeUser);
+                            })
+                            .map(storeUser1 -> {
+                                return storeUser1.getBasket();
+                            });
                 });
     }
 

@@ -18,32 +18,44 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.amen.isa.component.configuration.Constants.REQUEST_ID;
+import static com.amen.isa.component.configuration.Constants.REQUEST_ID_HEADER_NAME;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class ProductServiceClient {
+
     private final RestTemplate productServiceRestTemplate;
     private final WebClient productServiceWebClient;
 
     public Mono<Product> getProductById(Long productId) {
         return Mono.deferContextual(contextView -> {
-                    String tracingId = contextView.get("tracing-id");
-                    log.info("TracingId: {}", tracingId);
+                    String reqId = contextView.get(REQUEST_ID);
+                    log.info("ReqId: {}", reqId);
 
                     var result = productServiceWebClient.get()
                             .uri("/product/byId?productId=" + productId)
-                            .header("x-tracing-id", tracingId)
+                            .header(REQUEST_ID_HEADER_NAME, reqId)
                             .retrieve()
-                            .bodyToMono(Product.class)
-                            .mapNotNull(product -> product)
-                            .contextWrite(Context.of("tracing-id", tracingId));
+                            .bodyToMono(Product.class);
 
                     log.info("Result: {}", result);
                     return result;
-                })
-                .mapNotNull(product -> product)
-                .contextWrite(Context.of("tracing-id", "123-tracingId"));
+                });
     }
+
+
+
+
+
+
+
+
+
+
+
+
 
     public List<Product> getAllBlocking() {
         ResponseEntity<List<Product>> responseEntity = productServiceRestTemplate.exchange("http://localhost:8082/product",

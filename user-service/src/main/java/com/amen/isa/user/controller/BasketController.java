@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 import reactor.util.context.Context;
 
+import static com.amen.isa.component.configuration.Constants.REQUEST_ID;
+import static com.amen.isa.component.configuration.Constants.REQUEST_ID_HEADER_NAME;
+
 // TODO: Write me :)
 @Slf4j
 @RestController
@@ -37,7 +40,7 @@ public class BasketController {
         log.info("Trace start: {}", traceId);
 
         return basketService.addToBasket(userId, productId)
-                .contextWrite(Context.of("tracing-id", traceId));
+                .contextWrite(Context.of(REQUEST_ID, traceId));
     }
 
     @DeleteMapping("/{userId}")
