@@ -33,15 +33,11 @@ public class BasketController {
 
     @PostMapping("/{userId}")
     public Mono<Basket> addToBasket(@PathVariable String userId, @RequestParam long productId) {
-        Span span = GlobalOpenTelemetry.get().getTracer("user-serivce").spanBuilder("addToBasket").startSpan();
+        var traceId = Span.current().getSpanContext().getTraceId();
+        log.info("Trace start: {}", traceId);
 
-        return Mono.deferContextual((ctx) -> {
-                    Object initialValue = ctx.getOrDefault("tracing-id", span.getSpanContext().getTraceId());
-                    log.info("Starting trace: " + initialValue);
-
-                    return basketService.addToBasket(userId, productId);
-                })
-                .contextWrite(Context.of("tracing-id", span.getSpanContext().getTraceId()));
+        return basketService.addToBasket(userId, productId)
+                .contextWrite(Context.of("tracing-id", traceId));
     }
 
     @DeleteMapping("/{userId}")

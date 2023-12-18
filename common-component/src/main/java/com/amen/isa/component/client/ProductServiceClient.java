@@ -25,10 +25,20 @@ public class ProductServiceClient {
     private final WebClient productServiceWebClient;
 
     public Mono<Product> getProductById(Long productId) {
-        return productServiceWebClient.get()
-                .uri("/product/byId?productId=" + productId)
-                .retrieve()
-                .bodyToMono(Product.class);
+        return Mono.deferContextual(contextView -> {
+            String tracingId = contextView.get("tracing-id");
+            log.info("TracingId: {}", tracingId);
+
+            var result = productServiceWebClient.get()
+                    .uri("/product/byId?productId=" + productId)
+                    .header("x-tracing-id", tracingId)
+                    .retrieve()
+                    .bodyToMono(Product.class)
+                    .log();
+
+            log.info("Result: {}", result);
+            return result;
+        });
     }
 
     public List<Product> getAllBlocking() {
@@ -55,7 +65,7 @@ public class ProductServiceClient {
         return null;
     }
 
-    public Mono<Product> getProductById(Long productId, Object t) {
+    public Mono<Product> getProductById(Long productId, String t) {
         log.info("Span: {}", t);
         return productServiceWebClient.get()
                 .uri("/product/byId?productId=" + productId)

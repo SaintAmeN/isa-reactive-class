@@ -4,9 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.ParallelFlux;
 import reactor.core.scheduler.Schedulers;
 import reactor.util.context.Context;
 
+import java.util.List;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -62,8 +64,6 @@ class BasketServiceImplTest {
                 .subscribe(integer -> {
 
                 });
-
-
         try {
             Thread.sleep(10000);
         } catch (InterruptedException e) {
@@ -71,8 +71,24 @@ class BasketServiceImplTest {
         }
     }
 
+    public ParallelFlux<Integer> toParallelize() {
+        return Flux.range(1, 10)
+                .parallel()
+                .runOn(Schedulers.newBoundedElastic(3, DEFAULT_BOUNDED_ELASTIC_QUEUESIZE, "isa"))
+                .map(integer -> {
+                    log.info("Start " + integer);
+                    try {
+                        Thread.sleep(1000 + new Random().nextInt(1000));
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    log.info("End " + integer);
+                    return integer;
+                });
+    }
+
     @Test
-    void testContext(){
+    void testContext() {
         // Start a Mono with a specific context value
         Mono<String> monoWithContext = Mono.deferContextual(ctx -> {
             String value = ctx.getOrDefault("initialKey", "DefaultValue");
@@ -91,6 +107,7 @@ class BasketServiceImplTest {
             log.info("Final Value in Context: " + finalValue);
         });
     }
+
     @Test
     void testContext2() throws InterruptedException {
         {

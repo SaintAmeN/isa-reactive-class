@@ -55,34 +55,23 @@ public class BasketServiceImpl implements IBasketService {
         return userRepository.findById(userId)
                 .flatMap(storeUser -> {
                     log.info("User is found");
-                    return Mono.deferContextual(contextView -> {
-                        var ctxVal = contextView.get("tracing-id");
-                        log.info("Defer: {}", String.valueOf(ctxVal));
-                        return Mono.zip(
-                                        // defer poczekaj ze stworzeniem flux/mono dopóki nie dotrzemy do tego miejsca
-                                        Mono.defer(() -> { // założenie: wszystkie wartości trzeba odpytać oddzielnie bo np. pochodzą z różnych serwisów
-                                            log.info("Fetch unit");
-                                            return productServiceClient.getProductById(productId, ctxVal).map(Product::getUnit);
-                                        }),
-                                        Mono.defer(() -> {
-                                            log.info("Fetch name");
-                                            return productServiceClient.getProductById(productId, ctxVal).map(Product::getName);
-                                        }))
-                                .map(tupleResult -> {
-                                    log.info("Tuple collected");
-                                    return new BasketPosition(0,
-                                                              new Product(0L, tupleResult.getT2(), 1, tupleResult.getT1()),
-                                                              new ProductQuantity(10.0, 1, tupleResult.getT1()));
-                                })
-                                .flatMap(basketPosition -> {
-                                    log.info("Tuple collected");
-                                    storeUser.getBasket().getPositions().add(basketPosition);
-                                    return userRepository.save(storeUser);
-                                })
-                                .map(storeUser1 -> {
-                                    return storeUser1.getBasket();
-                                });
-                    });
+                    return Mono.zip(
+                                    productServiceClient.getProductById(productId).map(Product::getUnit),
+                                    productServiceClient.getProductById(productId).map(Product::getName))
+                            .map(tupleResult -> {
+                                log.info("Tuple collected");
+                                return new BasketPosition(0,
+                                                          new Product(0L, tupleResult.getT2(), 1, tupleResult.getT1()),
+                                                          new ProductQuantity(10.0, 1, tupleResult.getT1()));
+                            })
+                            .flatMap(basketPosition -> {
+                                log.info("Tuple collected");
+                                storeUser.getBasket().getPositions().add(basketPosition);
+                                return userRepository.save(storeUser);
+                            })
+                            .map(storeUser1 -> {
+                                return storeUser1.getBasket();
+                            });
                 });
     }
 
