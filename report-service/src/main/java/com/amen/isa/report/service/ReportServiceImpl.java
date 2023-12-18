@@ -34,6 +34,7 @@ public class ReportServiceImpl implements IReportService {
         return null;
     }
 
+    // wersja 1
     //    @Override
 //    public Mono<Report> generateReport(@NonNull LocalDateTime from,
 //                                       @NonNull LocalDateTime to) {
@@ -55,6 +56,8 @@ public class ReportServiceImpl implements IReportService {
 //                              .then())
 //                .then(Mono.just(Report.builder().totalCost(cost.get()).totalSales(sales.get()).build()));
 //    }
+
+    // wersja 2
 //    public Mono<Report> generateReport(@NonNull LocalDateTime from,
 //                                       @NonNull LocalDateTime to) {
 //        if (!from.isBefore(to)) {
@@ -73,22 +76,33 @@ public class ReportServiceImpl implements IReportService {
 //                });
 //    }
 
+    // wersja 3
     public Mono<Report> generateReport(@NonNull LocalDateTime from,
                                        @NonNull LocalDateTime to) {
         if (!from.isBefore(to)) {
             throw new IllegalArgumentException("IAE");
         }
 
+        return Mono.zip(
+                        calculateCost(from, to),
+                        calculateSales(from, to)
+                )
+                .map(tuple -> Report.builder().totalCost(tuple.getT1()).totalSales(tuple.getT2()).build());
+    }
+
+    private Mono<Double> calculateCost(@NonNull LocalDateTime from,
+                                       @NonNull LocalDateTime to) {
         return shipmentServiceClient.fetchShipmentsBetweenDates(from, to)
                 .flatMap(shipmentResponse -> productServiceClient.getProductById(shipmentResponse.getProductId()))
                 .map(Product::getQuantity)
-                .reduce(Double::sum)
-                .flatMap(cost -> {
-                    return orderServiceClient.fetchOrdersBetweenDates(from, to)
-                            .map(this::sumSales)
-                            .reduce(Double::sum)
-                            .map(sumSales -> Report.builder().totalCost(cost).totalSales(sumSales).build());
-                });
+                .reduce(Double::sum);
+    }
+
+    private Mono<Double> calculateSales(@NonNull LocalDateTime from,
+                                        @NonNull LocalDateTime to) {
+        return orderServiceClient.fetchOrdersBetweenDates(from, to)
+                .map(this::sumSales)
+                .reduce(Double::sum);
     }
 
     private Mono<Product> getFromMap(ShipmentResponse shipment, Map<Long, Product> memory) {
