@@ -36,11 +36,7 @@ public class BasketController {
 
     @PostMapping("/{userId}")
     public Mono<Basket> addToBasket(@PathVariable String userId, @RequestParam long productId) {
-        var traceId = Span.current().getSpanContext().getTraceId();
-        log.info("Trace start: {}", traceId);
-
-        return basketService.addToBasket(userId, productId)
-                .contextWrite(Context.of(REQUEST_ID, traceId));
+        return basketService.addToBasket(userId, productId);
     }
 
     @DeleteMapping("/{userId}")
