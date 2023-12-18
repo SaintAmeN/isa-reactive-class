@@ -2,16 +2,14 @@ package com.amen.isa.model.domain;
 
 
 import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Document(collection = "store.user")

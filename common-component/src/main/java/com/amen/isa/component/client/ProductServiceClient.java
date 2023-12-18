@@ -12,6 +12,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.context.Context;
 
 import java.util.List;
 import java.util.Map;
@@ -26,19 +27,22 @@ public class ProductServiceClient {
 
     public Mono<Product> getProductById(Long productId) {
         return Mono.deferContextual(contextView -> {
-            String tracingId = contextView.get("tracing-id");
-            log.info("TracingId: {}", tracingId);
+                    String tracingId = contextView.get("tracing-id");
+                    log.info("TracingId: {}", tracingId);
 
-            var result = productServiceWebClient.get()
-                    .uri("/product/byId?productId=" + productId)
-                    .header("x-tracing-id", tracingId)
-                    .retrieve()
-                    .bodyToMono(Product.class)
-                    .log();
+                    var result = productServiceWebClient.get()
+                            .uri("/product/byId?productId=" + productId)
+                            .header("x-tracing-id", tracingId)
+                            .retrieve()
+                            .bodyToMono(Product.class)
+                            .mapNotNull(product -> product)
+                            .contextWrite(Context.of("tracing-id", tracingId));
 
-            log.info("Result: {}", result);
-            return result;
-        });
+                    log.info("Result: {}", result);
+                    return result;
+                })
+                .mapNotNull(product -> product)
+                .contextWrite(Context.of("tracing-id", "123-tracingId"));
     }
 
     public List<Product> getAllBlocking() {
@@ -67,10 +71,12 @@ public class ProductServiceClient {
 
     public Mono<Product> getProductById(Long productId, String t) {
         log.info("Span: {}", t);
-        return productServiceWebClient.get()
+        var product = productServiceWebClient.get()
                 .uri("/product/byId?productId=" + productId)
                 .header("x-tracing-id", String.valueOf(t))
                 .retrieve()
-                .bodyToMono(Product.class);
+                .bodyToMono(Product.class)
+                .block();
+        return Mono.just(product);
     }
 }

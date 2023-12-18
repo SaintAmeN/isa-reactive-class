@@ -22,8 +22,7 @@ public class ProductsController {
     }
 
     @GetMapping("/byId")
-    public Product getProduct(@RequestParam Long productId, @RequestHeader("x-tracing-id") String tracingId) {
-        log.info("Request with trace: {}", tracingId);
+    public Product getProduct(@RequestParam Long productId) {
         return productService.getProduct(productId);
     }
 

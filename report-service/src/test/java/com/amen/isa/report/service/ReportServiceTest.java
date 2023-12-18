@@ -61,11 +61,10 @@ class ReportServiceTest {
     @MethodSource("invalidDateRanges")
     void testGenerateReportInvalidDates(LocalDateTime startDate, LocalDateTime endDate) {
         // Call the service method and expect an exception
-        assertThrows(IllegalArgumentException.class, () -> reportService.generateReport(startDate, endDate));
+        assertThrows(IllegalArgumentException.class, () -> reportService.generateReport(startDate, endDate).block());
     }
 
     // Add more tests for error cases, e.g., missing products, orders, etc.
-
     private static Stream<Arguments> invalidDateRanges() {
         // Provide various invalid date ranges for parameterized testing
         return Stream.of(
@@ -99,7 +98,7 @@ class ReportServiceTest {
         when(productServiceClient.fetchAvailableProducts()).thenReturn(Flux.empty());
 
         // Call the service method and expect an exception
-        assertThrows(IllegalStateException.class, () -> reportService.generateReport(LocalDateTime.now().minusDays(7), LocalDateTime.now()));
+        assertThrows(IllegalStateException.class, () -> reportService.generateReport(LocalDateTime.now().minusDays(7), LocalDateTime.now()).block());
     }
 
     @Test
